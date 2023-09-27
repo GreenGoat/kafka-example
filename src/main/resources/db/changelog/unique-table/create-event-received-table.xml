@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+		http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+    <changeSet id="1" author="aconstanti">
+        <preConditions>
+            <not>
+                <tableExists tableName="unique_event_received"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="unique_event_received">
+            <column type="integer" name="id" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+
+
+            <!-- HERE IS THE IMPORTANT PART-->
+            <column type="VARCHAR" name="event_id" remarks="Event id from Kafka">
+                <constraints unique="true" uniqueConstraintName="EVENT_UK" nullable="false"/>
+            </column>
+            <column type="VARCHAR" name="event_source" remarks="Event source from Kafka">
+                <constraints unique="true" uniqueConstraintName="EVENT_UK" nullable="false"/>
+            </column>
+
+
+            <column type="VARCHAR" name="subject" remarks="Event subject from Kafka"/>
+            <column type="TIMESTAMP" name="event_timestamp" remarks="Event timestamp from Kafka">
+                <constraints nullable="false"/>
+            </column>
+            <column type="TIMESTAMP(6)" name="created_on" remarks="Record created timestamp"
+                    defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

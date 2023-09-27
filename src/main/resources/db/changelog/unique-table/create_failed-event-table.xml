@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+		http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+    <changeSet id="2" author="aconstanti">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="failed_event"/>
+            </not>
+        </preConditions>
+
+        <comment>Table to store failed events for further reprocessing</comment>
+
+        <createTable tableName="failed_event" remarks="Reprocessing table for failed Kafka events">
+            <column type="integer" name="id" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="FAILED_EVENT_PK"/>
+            </column>
+            <column type="varchar(50)" name="event_id" remarks="Event id from cloud event">
+                <constraints unique="true" uniqueConstraintName="FAILED_EVENT_UK" nullable="true"/>
+            </column>
+            <column type="varchar(255)" name="event_source" remarks="Event source from cloud event">
+                <constraints unique="true" uniqueConstraintName="FAILED_EVENT_UK" nullable="true"/>
+            </column>
+            <column type="varchar(150)" name="subject" remarks="Event subject from cloud event"/>
+            <column type="TIMESTAMP(6)" name="event_timestamp" remarks="Event timestamp from cloud event"/>
+            <column type="CLOB" name="message" remarks="JSON body of the event">
+                <constraints nullable="false"/>
+            </column>
+            <column type="varchar(50)" name="requeue_action" remarks="Reprocessing action: FAILED, REQUEUE"/>
+            <column type="NUMBER" name="retry_count" remarks="Count of retry attempts" defaultValueNumeric="0"/>
+            <column type="TIMESTAMP(6)" name="failure_timestamp" remarks="Last time failure occurred"
+                    defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column type="varchar(3000)" name="failure_message" remarks="Latest error message"/>
+            <column type="varchar(200)" name="requeue_topic"
+                    remarks="Original topic to requeue to - especially useful when MS reads from multiple topics"/>
+        </createTable>
+
+        <createIndex tableName="FAILED_EVENT" indexName="FAILED_EVENT_RETRY_IDX">
+            <column name="retry_count"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

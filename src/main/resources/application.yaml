@@ -1,0 +1,51 @@
+
+spring:
+  application:
+    name: kafka-consumer-producer-example
+  datasource:
+    hikari:
+      schema: kafka_example_schema
+      minimum-idle: 1
+  jpa:
+    properties:
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+      org.hibernate.envers.do_not_audit_optimistic_locking_field: false
+    hibernate:
+      ddl-auto: none
+  liquibase:
+    change-log: db/changelog/db.changelog-master.xml
+    default-schema: kafka_example_schema
+
+  kafka:
+    topic:
+      default:
+        partitions: 10
+        replicas: 3
+      example-topic:
+        name: example-topic
+        group-id: ${spring.kafka.topic.example-topic.name}-${spring.application.name}
+        partitions: ${spring.kafka.topic.default.partitions}
+        replicas: ${spring.kafka.topic.default.replicas}
+    deadletter:
+      suffix: -dlq-${spring.application.name}
+      partitions: 4
+    consumer:
+      enable-auto-commit: false
+      auto-offset-reset: earliest
+      max-retries: 12
+      max-poll-records: 20
+      retry-failed-event:
+        initial-delay-minute: 1
+        fixed-delay-minute: 5
+      extended-retry:
+        last-fail-hours: 24
+        max-age-days: 30
+        fixed-delay-min: 60
+        max-batch-size: 100
+        report-after-days: 14
+      properties:
+        isolation.level: read_committed
+
+server:
+  shutdown: graceful
+  servlet.context-path: /

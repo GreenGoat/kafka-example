@@ -1,0 +1,7 @@
+spring.kafka.properties:
+      security:
+        protocol: PLAINTEXT
+logging:
+  level:
+    root: warn
+    au.com.example.kafka.kafkaconsumerproducerexample: info
